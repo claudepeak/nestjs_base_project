@@ -1,0 +1,5 @@
+export enum InviteTypeEnums {
+  FRIEND_REQUEST = 'FRIEND_REQUEST',
+  BOOKING_REQUEST = 'BOOKING',
+  CIRCLE_REQUEST = 'CIRCLE',
+}

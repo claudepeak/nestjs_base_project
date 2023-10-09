@@ -1,0 +1,48 @@
+# Build aşaması
+FROM --platform=linux/amd64 node:18-buster AS build
+
+# Install openSSL for prisma and debian packages
+RUN apt-get update && apt-get install -y libssl-dev
+
+WORKDIR /usr/src/app
+COPY package.json .
+COPY package-lock.json .
+# For render.com
+RUN npm install
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+# Production aşaması
+FROM --platform=linux/amd64 node:18-slim
+
+# OpenSS install 1.1.x
+RUN apt-get update && apt-get install -y openssl 
+RUN apt-get update && apt-get install -y libssl-dev 
+
+# Print openSSL version
+RUN echo "OpenSSL version: $(openssl version)"
+
+# Print glibc version
+RUN echo "glibc version: $(ldd --version)"
+
+WORKDIR /usr/src/app
+COPY package.json .
+RUN npm install --only=production
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/node_modules/.prisma/client  ./node_modules/.prisma/client
+COPY --from=build /usr/src/app/templates ./templates
+
+# Copy .env file to /etc/secrets directory
+COPY .env /etc/secrets/env
+COPY fb-json.json .
+
+# Copy .env file from /etc/secrets directory to /usr/src/app
+RUN cp /etc/secrets/env .env
+
+# Set NODE_ENV to production
+ENV NODE_ENV production
+
+EXPOSE 80
+
+CMD npm run start:prod
