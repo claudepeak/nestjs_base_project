@@ -13,10 +13,6 @@ export class UpdateProfileDto {
   @MinLength(6)
   password?: string;
 
-  @ApiProperty({ example: 'alper', required: false })
-  @IsString()
-  @IsOptional()
-  userName?: string;
 
   @ApiProperty({ example: 'alper', required: false })
   @IsString()

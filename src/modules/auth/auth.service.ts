@@ -58,8 +58,10 @@ export class AuthService {
     /// This method is used to create a guest user
     async createGuestUser(): Promise<SignupResponseDto> {
         const sessionId = await this.generateSessionId();
+        const random5Int = Math.floor(10000 + Math.random() * 90000);
         const user = await this.prisma.user.create({
             data: {
+                name: 'Guest#'+random5Int,
                 userType: UserType.GUEST,
             },
         });
@@ -69,9 +71,22 @@ export class AuthService {
                 user_id: user.id,
             },
         });
+
+
+        const userResponseModel: UserResponseModel = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            createdAt: user.createdAt,
+            isAdmin: user.isAdmin,
+            updatedAt: user.updatedAt,
+            userType: user.userType,
+        };
+
+
         return {
             access_token: await this.generateAccessToken(sessionId, user),
-            user: user,
+            user: userResponseModel
         };
 
     }
@@ -83,7 +98,7 @@ export class AuthService {
     ): Promise<SignupResponseDto> {
         const sessionId = await this.generateSessionId();
         try {
-            const {email, password, name, username, is_admin} =
+            const {email, password, name, is_admin} =
                 authUserDto;
 
             const checkUserEmail = await this.prisma.user.findFirst({
@@ -103,7 +118,6 @@ export class AuthService {
                 data: {
                     email: email,
                     name: name,
-                    userName: username,
                     password: hash,
                     isAdmin: is_admin,
                 },
@@ -113,7 +127,6 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                userName: user.userName,
                 createdAt: user.createdAt,
                 isAdmin: user.isAdmin,
                 updatedAt: user.updatedAt,
@@ -141,7 +154,6 @@ export class AuthService {
         const userResponseModel: UserResponseModel = {
             id: user.id,
             email: user.email,
-            userName: user.userName,
             name: user.name,
             createdAt: user.createdAt,
             isAdmin: user.isAdmin,
@@ -199,7 +211,6 @@ export class AuthService {
         const userResponseModel: UserResponseModel = {
             id: user.id,
             email: user.email,
-            userName: user.userName,
             name: user.name,
             isAdmin: user.isAdmin,
             createdAt: user.createdAt,
@@ -353,7 +364,7 @@ export class AuthService {
     /// User update profile
     async updateProfile(updateProfileDto: UpdateProfileDto, user: User) {
         try {
-            const {userName, password, email, name} = updateProfileDto;
+            const { password, email, name} = updateProfileDto;
 
             const data: { [key: string]: string } = {};
 
@@ -375,7 +386,6 @@ export class AuthService {
             }
 
             if (email) data.email = email;
-            if (userName) data.userName = userName;
             if (name) data.name = name;
             if (password) {
                 if (password.length < 6) {
@@ -422,7 +432,7 @@ export class AuthService {
             const userResponseModel: UserResponseModel = {
                 id: user.id,
                 email: user.email,
-                userName: user.userName,
+
                 name: user.name,
                 isAdmin: user.isAdmin,
                 createdAt: user.createdAt,

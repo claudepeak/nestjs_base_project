@@ -22,11 +22,6 @@ export class SignUpUserDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'duzgun', required: true })
-  @IsString()
-  @IsNotEmpty()
-  username: string;
-
 
   @ApiProperty({ example: '+905367051579', required: false })
   @IsString()

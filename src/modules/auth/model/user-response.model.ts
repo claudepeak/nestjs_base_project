@@ -11,9 +11,6 @@ export class UserResponseModel {
     @ApiProperty({type: String})
     email: string;
 
-    @ApiProperty({type: String})
-    userName: string;
-
     @ApiProperty({type: Boolean})
     isAdmin: boolean;
 

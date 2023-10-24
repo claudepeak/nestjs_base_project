@@ -12,7 +12,6 @@ model User {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   email     String?   @unique
   name      String?
-  userName  String?
   password  String?
   userType  UserType  @default(GUEST)
   isAdmin   Boolean   @default(false)
