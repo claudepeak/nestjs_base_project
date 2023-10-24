@@ -8,7 +8,7 @@ import {
 import {SignupResponseDto, SignUpUserDto} from './dto/sign-up-user.dto';
 import {PrismaService} from 'src/prisma/prisma.service';
 import {ConfigService} from '@nestjs/config';
-import {User} from '@prisma/client';
+import {User, UserType} from '@prisma/client';
 import {JwtService} from '@nestjs/jwt';
 import * as argon from 'argon2';
 import {SignInUserDto} from './dto/sign-in-user.dto';
@@ -24,7 +24,8 @@ import {UpdateProfileDto} from './dto/update-profile.dto';
 import {SendMailDto} from 'src/app/services/mailer/dto/send-mail.dto';
 import {isValidObjectId} from 'src/app/common/validator/object-id-validator.util';
 import {EmailTemplates} from 'templates/enum/email-templates.enum';
-import * as admin from 'firebase-admin';
+import { UserTypeEnums } from 'src/app/common/enums/user-type.enum';
+//import * as admin from 'firebase-admin';
 
 @Injectable()
 export class AuthService {
@@ -51,21 +52,36 @@ export class AuthService {
         return sessionId;
     }
 
-    async createToken() {
+
+
+
+    /// This method is used to create a guest user
+    async createGuestUser(): Promise<SignupResponseDto> {
         const sessionId = await this.generateSessionId();
+        const user = await this.prisma.user.create({
+            data: {
+                userType: UserType.GUEST,
+            },
+        });
         await this.prisma.session.create({
             data: {
                 sessionId: sessionId,
+                user_id: user.id,
             },
         });
-        return {access_token: await this.generateAccessToken(sessionId)};
+        return {
+            access_token: await this.generateAccessToken(sessionId, user),
+            user: user,
+        };
+
     }
 
     /// This method is used to sign up a new user
     async signUp(
         authUserDto: SignUpUserDto,
-        sessionId: string,
+
     ): Promise<SignupResponseDto> {
+        const sessionId = await this.generateSessionId();
         try {
             const {email, password, name, username, is_admin} =
                 authUserDto;
@@ -89,7 +105,6 @@ export class AuthService {
                     name: name,
                     userName: username,
                     password: hash,
-
                     isAdmin: is_admin,
                 },
             });
@@ -102,6 +117,7 @@ export class AuthService {
                 createdAt: user.createdAt,
                 isAdmin: user.isAdmin,
                 updatedAt: user.updatedAt,
+                userType: user.userType,
             };
 
             return {
@@ -130,6 +146,7 @@ export class AuthService {
             createdAt: user.createdAt,
             isAdmin: user.isAdmin,
             updatedAt: user.updatedAt,
+            userType: user.userType,
         };
         //login ile sessionId ve user ı eşleştirme
         await this.prisma.session.update({
@@ -187,6 +204,7 @@ export class AuthService {
             isAdmin: user.isAdmin,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            userType: user.userType,
 
         };
 
@@ -409,6 +427,7 @@ export class AuthService {
                 isAdmin: user.isAdmin,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
+                userType: user.userType,
             };
 
             return usersResponseModel.push(userResponseModel);
@@ -538,7 +557,7 @@ export class AuthService {
 
         return delete user.password, user;
     }
-
+/* 
     async createFirebaseUserGoogle(profile: any, sessionId: any): Promise<any> {
         // Kullanıcıyı e-posta ile arayarak kontrol edin
         const uniqueSessionId = `${sessionId}-google`;
@@ -558,6 +577,7 @@ export class AuthService {
                 data: {
                     email: profile._json.email,
                     name: profile._json.displayName,
+
                     userName: profile._json.displayName,
                     isAdmin: false,
                 },
@@ -567,7 +587,7 @@ export class AuthService {
                   sessionId: uniqueSessionId,
                   user_id: user.id,
                 },
-              });*/
+              });
 
             // Kullanıcı oluşturuldu,
             return {
@@ -609,7 +629,7 @@ export class AuthService {
                     sessionId: uniqueSessionId,
                     user_id: user.id,
                   },
-                });*/
+                });
                 return {
                     //access_token: await this.generateAccessToken(sessionId, user),
                     user: createdUser,
@@ -621,7 +641,7 @@ export class AuthService {
             }
         }
     }
-
+ */
 
 }
 

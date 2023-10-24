@@ -15,10 +15,10 @@ import { FacebookStrategy } from '../../app/strategies/facebook.strategy';
 import { GoogleStrategy } from '../../app/strategies/google.strategy';
 import * as admin from 'firebase-admin';
 
-const serviceAccount = 'fb-json.json';
+/* const serviceAccount = 'fb-json.json';
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-});
+}); */
 
 @Module({
   controllers: [AuthController],
@@ -31,8 +31,8 @@ admin.initializeApp({
     PrismaService,
     JwtService,
     ConfigService,
-    GoogleStrategy,
-    FacebookStrategy,
+    //GoogleStrategy,
+    //FacebookStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

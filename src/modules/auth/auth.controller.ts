@@ -54,15 +54,20 @@ export class AuthController {
     private readonly jwt: JwtService,
   ) {}
 
-  @Public() // to skip the jwt authentication
-  @Post('create_token')
-  async createToken(): Promise<TokenDto> {
-    return this.authService.createToken();
+
+  /// New Guest User
+  @Public()
+
+  @Post('guest-user')
+  @ApiOperation({ summary: 'New Guest User' })
+  @ApiResponse({ type: UserResponseModel })
+  async guestUser(): Promise<SignupResponseDto> {
+    return this.authService.createGuestUser();
   }
 
   // Yeni kullanıcı kaydı oluşturur.
   //@Public() // to skip the jwt authentication
-  @Post('signup')
+  @Post('sign-up')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Sign up' })
@@ -76,16 +81,14 @@ export class AuthController {
     @Body() authUserDto: SignUpUserDto,
     @Req() req,
   ): Promise<SignupResponseDto> {
-    const sessionId = await this.jwt.decode(
-      req.headers.authorization?.split(' ')[1],
-    )['sessionId'];
-    return this.authService.signUp(authUserDto, sessionId);
+ 
+    return this.authService.signUp(authUserDto);
   }
 
   // Kullanıcı girişi
   @UsePipes(new ValidationPipe({ transform: true }))
   //@Public() // to skip the jwt authentication
-  @Post('signin')
+  @Post('sign-in')
   @ApiOperation({ summary: 'Sign in with email and password' })
   @ApiResponse({ type: SignupResponseDto })
   async signIn(
@@ -201,7 +204,7 @@ export class AuthController {
     return this.authService.updateAdminStatus(id, isAdmin);
   }
 
-  //Google giriş
+ /*  //Google giriş
   @Get('/google')
   @UseGuards(AuthGuard('google'))
   @Public()
@@ -214,7 +217,7 @@ export class AuthController {
     const sessionId = headers['user-agent'];
     /*const sessionId = await this.jwt.decode(
       req.headers.authorization?.split(' ')[1],
-    )['sessionId'];*/
+    )['sessionId'];
     console.log(sessionId);
     return this.authService.createFirebaseUserGoogle(req.user, sessionId);
   }
@@ -232,10 +235,12 @@ export class AuthController {
     const sessionId = headers['user-agent'];
     /* const sessionId = await this.jwt.decode(
        req.headers.authorization?.split(' ')[1],
-     )['sessionId'];*/
+     )['sessionId'];
     return await this.authService.createFirebaseUserFacebook(
       req.user,
       sessionId,
     );
   }
+
+  */
 }
